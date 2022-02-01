@@ -7,6 +7,7 @@ import {
   Toolbar,
   Typography,
   Switch,
+  Badge,
 } from '@material-ui/core';
 import { createTheme } from '@material-ui/core/styles';
 import Head from 'next/head';
@@ -20,7 +21,7 @@ import React, { useContext } from 'react';
 
 export default function Layout({ description, title, children }) {
   const { state, dispatch } = useContext(Store);
-  const { darkMode } = state;
+  const { darkMode, cart } = state;
   const theme = createTheme({
     typography: {
       fontFamily: 'Vazir',
@@ -98,7 +99,18 @@ export default function Layout({ description, title, children }) {
                 <Link>ورود</Link>
               </NextLink>
               <NextLink href="/card" passHref>
-                <Link>سبد خرید </Link>
+                <Link>
+                  {cart.cartItems.length > 0 ? (
+                    <Badge
+                      color="secondary"
+                      badgeContent={cart.cartItems.length}
+                    >
+                      سبد خرید
+                    </Badge>
+                  ) : (
+                    'سبد خرید'
+                  )}
+                </Link>
               </NextLink>
             </div>
           </Toolbar>

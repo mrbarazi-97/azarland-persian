@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 //import { useRouter } from 'next/router';
 //import data from '../../utils/data';
 import Layout from '../../components/Layout';
@@ -14,11 +14,16 @@ import {
 } from '@material-ui/core';
 import useStyles from '../../utils/style';
 import Image from 'next/image';
-import db from '../utils/db';
-import Product from '../models/Product';
+import db from '../../utils/db';
+import Product from '../../models/Product';
+import axios from 'axios';
+import { Store } from '../../utils/Store';
+import { useRouter } from 'next/router';
 
 export default function ProductScreen(props) {
-  const {product} = props;
+  const router = useRouter();
+  const { state, dispatch } = useContext(Store);
+  const { product } = props;
   const classes = useStyles();
   //const router = useRouter();
   //const { slug } = router.query;
@@ -26,6 +31,17 @@ export default function ProductScreen(props) {
   if (!product) {
     return <div>محصول مورد نظر پیدا نشد </div>;
   }
+  const addToCartHandler = async () => {
+    const existItem = state.cart.cartItems.find((x) => x._id === product._id);
+    const quantity = existItem ? existItem.quantity + 1 : 1;
+    const { data } = await axios.get(`/api/products/${product._id}`);
+    if (data.countInStock < quantity) {
+      window.alert('متاسفم ، مقدار مورد نظر بیشتر از موجودی ما است');
+      return;
+    }
+    dispatch({ type: 'CART_ADD_ITEM', payload: { ...product, quantity } });
+    router.push('/cart');
+  };
   return (
     <Layout title={product.name} description={product.description}>
       <div className={classes.section}>
@@ -94,7 +110,12 @@ export default function ProductScreen(props) {
                 </Grid>
               </ListItem>
               <ListItem>
-                <Button fullWidth variant="contained" color="primary">
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="primary"
+                  onClick={addToCartHandler}
+                >
                   افزودن به سبد خرید
                 </Button>
               </ListItem>
